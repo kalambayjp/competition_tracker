@@ -12,7 +12,7 @@ const NewGame = (props) => {
     const {user} = props;
     const [selectedGame, setSelectedGame] = useState("");
     const [options, setOptions] = useState([]);
-    const [friends, setFriends] = useState();
+    const [friends, setFriends] = useState([]);
     const [teamOne, setTeamOne] = useState([])
     const [teamTwo, setTeamTwo] = useState([])
     const [teamOneOutcome, setTeamOneOutcome] = useState(0);
@@ -23,9 +23,16 @@ const NewGame = (props) => {
     const defaultOption = [
         {
             name: user ? user.displayName : "",
-            value: user ? user.displayName : ""
+            value: user ? {displayName: user.displayName, uid: user.uid}: {}
         }
     ]
+    const updateTeamOne = (val) => {
+        setTeamOne(prevState => [...prevState, val]);
+        
+    }
+    const updateTeamTwo = (val) => {
+        setTeamTwo(prevState => [...prevState, val]);
+    }
 
     useEffect(() => {
         const fetchData = async () => {
@@ -51,17 +58,17 @@ const NewGame = (props) => {
         const gameData = {
             game: selectedGame,
             teamOne: {
-                users: [teamOne],
+                users: teamOne,
                 outcome: teamOneOutcome,
                 score: teamOneScore
             },
             teamTwo: {
-                users: [teamTwo],
+                users: teamTwo,
                 outcome: teamTwoOutcome,
                 score: teamTwoScore
             },
         }
-        addPlayedGame(user.uid, gameData);
+        addPlayedGame(gameData);
     }
 
     return (
@@ -76,7 +83,7 @@ const NewGame = (props) => {
                             options={defaultOption} 
                             placeholder="add a player" 
                             value={teamOne}
-                            onChange={setTeamOne}
+                            onChange={updateTeamOne}
                         />
 
                         <p> vs </p>
@@ -86,7 +93,7 @@ const NewGame = (props) => {
                             search={true} 
                             placeholder="add a player"
                             value={teamTwo}
-                            onChange={setTeamTwo}
+                            onChange={updateTeamTwo}
                         />
                     </>
                     :

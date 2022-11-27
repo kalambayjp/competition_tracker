@@ -17,6 +17,11 @@ exports.createGamesPlayedDoc = functions.auth.user().onCreate((user) => {
       .set({"gamesPlayed": []});
 });
 
+exports.createRecordsDoc = functions.auth.user().onCreate((user) => {
+  db.collection("records")
+      .doc(user.uid)
+      .set({wins: 0, losses: 0});
+});
 
 // // Create and deploy your first functions
 // // https://firebase.google.com/docs/functions/get-started
