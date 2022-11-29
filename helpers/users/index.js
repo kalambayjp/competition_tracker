@@ -20,8 +20,8 @@ export const getFriends = async (uid) => {
         return null;
     }
 
-    docSnap.data().friends.forEach(friend => {
-        friends.push({name: friend.displayName, value: {displayName: friend.displayName, uid: friend.uid}});
+    docSnap.data().friends.forEach(friend=> {
+        friends.push({name: friend.displayName, value:friend.uid});
     })
     
     return friends;

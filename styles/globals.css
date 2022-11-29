@@ -36,7 +36,11 @@ body,h1,h2,p,a,input{
 .add-players {
   display: flex;
   flex-direction: row;
-  justify-content: center;
+  justify-content: space-evenly;
+}
+.player-inputs {
+  display: flex;
+  flex-direction: column;
 }
 .game-outcome {
   display: flex;

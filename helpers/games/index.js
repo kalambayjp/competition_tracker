@@ -9,16 +9,14 @@ export const getGames = async () => {
     let options = [];
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
-        options.push({value: doc.id, label: doc.data().name});
+        options.push({value: doc.id, label: doc.data().name, key: doc.id});
     });
 
     return options;
 }
 const getWinningUids = (teamOne, teamTwo) => {
     const winningTeam = teamOne.outcome > 0 ? teamOne : teamTwo;
-    const playerUids = [];
-    winningTeam.users.forEach(user => playerUids.push(user.uid));
-
+    const playerUids = [...winningTeam.users];
     return playerUids;
 }
 
@@ -28,13 +26,15 @@ export const addPlayedGame = (gameData) => {
     const winningPlayers = getWinningUids(gameData.teamOne, gameData.teamTwo);
 
     allUsers.forEach(async user => {
-        const gamesDocRef = doc(db, "gamesPlayed", user.uid);
+        const gamesDocRef = doc(db, "gamesPlayed", user);
         await updateDoc(gamesDocRef, {gamesPlayed: arrayUnion(gameData)});
 
-        const recordDocRef = doc(db, "records", user.uid);
-        if (winningPlayers.includes(user.uid)) {
+        const recordDocRef = doc(db, "records", user);
+        if (winningPlayers.includes(user)) {
             await updateDoc(recordDocRef, {wins: increment(1)})
+            console.log(`gave user: ${user} a W`)
         } else {
+            console.log(`gave user: ${user} an L`)
             await updateDoc(recordDocRef, {losses: increment(1)})
         }
     })
