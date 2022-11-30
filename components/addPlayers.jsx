@@ -5,13 +5,33 @@ import { faCirclePlus, faCircleMinus } from "@fortawesome/free-solid-svg-icons";
 import 'react-select-search/style.css'
 
 const AddPlayers = (props) => {
-    const {userOption, friends, teamOne, setTeamOne, teamTwo, setTeamTwo} = props;
-   
+    const {
+        userOption, 
+        friends, 
+        teamOne, 
+        teamOneNames,
+        setTeamOne, 
+        setTeamOneNames,
+        teamTwo, 
+        teamTwoNames,
+        setTeamTwo,
+        setTeamTwoNames,
+        setFormState
+    } = props;
     const updateTeamOne = (val) => {
-        setTeamOne(prevState => [... prevState, val])
+        setTeamOne(prevState => [... prevState, val]);
+        friends.forEach(friend=> {
+            friend.value === val ? setTeamOneNames(prevState => [...prevState, friend.name]) : null
+        });
+        if (val === userOption[0].value) {
+            setTeamOneNames(prevState => [...prevState, userOption[0].name])
+        }
     }
     const updateTeamTwo = (val) => {
-        setTeamTwo(prevState => [... prevState, val])
+        setTeamTwo(prevState => [... prevState, val]);
+        friends.forEach(friend=> {
+            friend.value === val ? setTeamTwoNames(prevState => [...prevState, friend.name]) : null
+        });
     }
     const [teamOneInputs, setTeamOneInputs] = useState([
         <SelectSearch 
@@ -29,13 +49,12 @@ const AddPlayers = (props) => {
             placeholder={"add a player"}
         />
     ]);
-    const [editplayers, setEditPlayers] = useState(true);
-  
     const updateInputField = (val, func, state) => {
+        // create a new input field
         if (val) {
+            // filter for players already selected
             const allPlayers = [...teamOne, ...teamTwo];
             const availablePlayers = friends.filter(friend => !allPlayers.includes(friend.value));
-
             func(prevState => [...prevState, <SelectSearch 
                 key={`team${state === teamOne ? "One" : "Two"}-player${state === teamOne ? teamOneInputs.length : teamTwoInputs.length}`}
                 options={availablePlayers}
@@ -44,7 +63,7 @@ const AddPlayers = (props) => {
             />])
             return;
         }
-
+        // remove an input field
         func(prevState => prevState.slice(0, prevState.length - 1));
         
         if (state === teamOne && teamOneInputs.length === state.length) {
@@ -52,14 +71,12 @@ const AddPlayers = (props) => {
             setTeamOne(state);
             return;
         }
-
         if (state === teamTwo && teamTwoInputs.length === state.length) {
             state.pop();
             setTeamTwo(state);
             return
         }
     }
-    
 
     return (
         <div className="add-players">
@@ -69,25 +86,22 @@ const AddPlayers = (props) => {
                     <div className="player-inputs">
 
                         {teamOneInputs}
-                        
-                        {
-                            editplayers ? 
-                            <div className="add-players">
-                                <FontAwesomeIcon 
-                                    icon={faCirclePlus} 
-                                    onClick={() => updateInputField(1, setTeamOneInputs, teamOne)}
-                                />
 
-                                {
-                                    teamOneInputs.length >= 2 ? 
-                                    <FontAwesomeIcon 
-                                        icon={faCircleMinus} 
-                                        onClick={() => updateInputField(0, setTeamOneInputs, teamOne)}
-                                    /> : 
-                                    null
-                                }
-                            </div> : null
-                        }
+                        <div className="add-players">
+                            <FontAwesomeIcon 
+                                icon={faCirclePlus} 
+                                onClick={() => updateInputField(1, setTeamOneInputs, teamOne)}
+                            />
+
+                            {
+                                teamOneInputs.length >= 2 ? 
+                                <FontAwesomeIcon 
+                                    icon={faCircleMinus} 
+                                    onClick={() => updateInputField(0, setTeamOneInputs, teamOne)}
+                                /> : 
+                                null
+                            }
+                        </div>
                     </div>
 
                     <p> vs </p>
@@ -96,8 +110,6 @@ const AddPlayers = (props) => {
                         
                         {teamTwoInputs}
 
-                        {
-                            editplayers ? 
                             <div className="add-players">
                             <FontAwesomeIcon 
                                 icon={faCirclePlus} 
@@ -112,12 +124,11 @@ const AddPlayers = (props) => {
                                 /> : 
                                 null
                             }
-                            </div> : null
-                        }
+                            </div> 
 
                         {
                             teamOne.length && teamTwo.length ?
-                            <button onClick={() => setEditPlayers(false)}> Click to confirm team inputs</button> : null
+                            <button onClick={() => setFormState(prevState => [...prevState, "outcome"])}> Click to confirm team inputs</button> : null
                         }
                     </div>
                 </>
