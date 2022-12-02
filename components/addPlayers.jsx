@@ -9,29 +9,34 @@ const AddPlayers = (props) => {
         userOption, 
         friends, 
         teamOne, 
-        teamOneNames,
         setTeamOne, 
-        setTeamOneNames,
         teamTwo, 
-        teamTwoNames,
         setTeamTwo,
-        setTeamTwoNames,
         setFormState
     } = props;
+    const getAllSelectedPlayerUids = () => {
+        const allPlayers = [...teamOne, ...teamTwo];
+        return allPlayers.map(player => player[0]);
+    }
     const updateTeamOne = (val) => {
-        setTeamOne(prevState => [... prevState, val]);
-        friends.forEach(friend=> {
-            friend.value === val ? setTeamOneNames(prevState => [...prevState, friend.name]) : null
-        });
-        if (val === userOption[0].value) {
-            setTeamOneNames(prevState => [...prevState, userOption[0].name])
+        if (teamOne.length > 0) {
+            let players = [...teamOne];
+            players[val[2]] = val
+            setTeamOne(players);
+        } else {
+            setTeamOne([val]);  
         }
     }
     const updateTeamTwo = (val) => {
-        setTeamTwo(prevState => [... prevState, val]);
-        friends.forEach(friend=> {
-            friend.value === val ? setTeamTwoNames(prevState => [...prevState, friend.name]) : null
-        });
+        if (teamTwo.length > 0) {
+            let players = [...teamTwo];
+            players[val[2]] = val
+            setTeamTwo(players);
+        } else {
+            setTeamTwo([val]);
+            
+        }
+     
     }
     const [teamOneInputs, setTeamOneInputs] = useState([
         <SelectSearch 
@@ -47,19 +52,26 @@ const AddPlayers = (props) => {
             options={friends ?? null}
             onChange={updateTeamTwo}
             placeholder={"add a player"}
+            search={true}
         />
     ]);
     const updateInputField = (val, func, state) => {
         // create a new input field
         if (val) {
             // filter for players already selected
-            const allPlayers = [...teamOne, ...teamTwo];
-            const availablePlayers = friends.filter(friend => !allPlayers.includes(friend.value));
+            const allPlayerUids = getAllSelectedPlayerUids();
+            const availablePlayers = friends.filter(friend => !allPlayerUids.includes(friend.value[0]));
+            if (state === teamOne) {
+                availablePlayers.forEach((player) => player.value[2] = teamOneInputs.length);
+            } else {
+                availablePlayers.forEach((player) => player.value[2] = teamTwoInputs.length);
+            }
             func(prevState => [...prevState, <SelectSearch 
                 key={`team${state === teamOne ? "One" : "Two"}-player${state === teamOne ? teamOneInputs.length : teamTwoInputs.length}`}
                 options={availablePlayers}
                 onChange={state === teamOne ? updateTeamOne : updateTeamTwo}
                 placeholder={"add a player"}
+                search={true}
             />])
             return;
         }
@@ -77,6 +89,18 @@ const AddPlayers = (props) => {
             return
         }
     }
+    const handleChangeState = () => {
+        // check for duplicates
+        const players = getAllSelectedPlayerUids();
+        function hasDuplicates(arr) {
+            return new Set(arr).size !== arr.length;
+        }
+        if (hasDuplicates(players)) {
+            return alert("players can only be entered once, please revise form")
+        } else {
+            setFormState(prevState => [...prevState, "outcome"])
+        }
+    }
 
     return (
         <div className="add-players">
@@ -84,9 +108,7 @@ const AddPlayers = (props) => {
                 friends ? 
                 <>
                     <div className="player-inputs">
-
                         {teamOneInputs}
-
                         <div className="add-players">
                             <FontAwesomeIcon 
                                 icon={faCirclePlus} 
@@ -106,16 +128,13 @@ const AddPlayers = (props) => {
 
                     <p> vs </p>
 
-                    <div className="player-inputs">
-                        
+                    <div className="player-inputs"> 
                         {teamTwoInputs}
-
                             <div className="add-players">
                             <FontAwesomeIcon 
                                 icon={faCirclePlus} 
                                 onClick={() => updateInputField(1, setTeamTwoInputs, teamTwo)}
                             />
-
                             {
                                 teamTwoInputs.length >= 2 ? 
                                 <FontAwesomeIcon 
@@ -125,14 +144,12 @@ const AddPlayers = (props) => {
                                 null
                             }
                             </div> 
-
                         {
                             teamOne.length && teamTwo.length ?
-                            <button onClick={() => setFormState(prevState => [...prevState, "outcome"])}> Click to confirm team inputs</button> : null
+                            <button onClick={() => handleChangeState()}> Click to confirm team inputs</button> : null
                         }
                     </div>
-                </>
-                :
+                </> :
                 <p>
                     add some friends to add new games
                 </p>

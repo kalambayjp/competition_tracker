@@ -18,14 +18,10 @@ const NewGame = (props) => {
     const [teamTwo, setTeamTwo] = useState([]);
     const [teamTwoOutcome, setTeamTwoOutcome] = useState(0);
     const [formState, setFormState] = useState(["select game"]);
-    const [teamOneNames, setTeamOneNames] = useState([]);
-    const [teamTwoNames, setTeamTwoNames] = useState([]);
 
     const clearStateVars = () => {
         setTeamOne([]);
-        setTeamOneNames([]);
         setTeamTwo([]);
-        setTeamTwoNames([]);
     }
     useEffect(() => {
         const fetchData = async () => {
@@ -35,7 +31,7 @@ const NewGame = (props) => {
             setFriends(fetchedFriends);
             setUserOption([{
                 name: user.displayName, 
-                value: user.uid, 
+                value: [user.uid, user.displayName, 0], 
                 key: user.uid
             }])
         }
@@ -45,14 +41,22 @@ const NewGame = (props) => {
     }, [])
     const handleSubmit = (e) => {
         e.preventDefault();
+        if (
+            selectedGame === null ||
+            teamOne.length < 1 ||
+            teamTwo.length < 1 ||
+            (teamOneOutcome === 0 && teamTwoOutcome === 0)
+        ) {
+            return alert("Missing information, please revise form");
+        }
         const gameData = {
             game: selectedGame,
             teamOne: {
-                users: teamOne,
+                users: teamOne.map(player => player[0]),
                 outcome: teamOneOutcome,
             },
             teamTwo: {
-                users: teamTwo,
+                users: teamTwo.map(player => player[0]),
                 outcome: teamTwoOutcome,
             },
         }
@@ -64,8 +68,8 @@ const NewGame = (props) => {
         setSelectedGame(val);
         setFormState(prevState => [...prevState, "add players"])
     }
-    const teamOneElements = teamOneNames.map((name, i) => <p key={`teamOne-${i}`}>{name}</p>);
-    const teamTwoElements = teamTwoNames.map((name, i) => <p key={`teamTwo-${i}`}>{name}</p>);
+    const teamOneElements = teamOne.map((nameArr, i) => <p key={`teamOne-${i}`}>{nameArr[1]}</p>);
+    const teamTwoElements = teamTwo.map((nameArr, i) => <p key={`teamTwo-${i}`}>{nameArr[1]}</p>);
     const stepBackInForm = () => {
         setFormState(prevState => prevState.slice(0, prevState.length - 1));
         clearStateVars();
@@ -98,10 +102,6 @@ const NewGame = (props) => {
                     setTeamOne={setTeamOne}
                     teamTwo={teamTwo}
                     setTeamTwo={setTeamTwo}
-                    teamOneNames={teamOneNames}
-                    setTeamOneNames={setTeamOneNames}
-                    teamTwoNames={teamTwoNames}
-                    setTeamTwoNames={setTeamTwoNames}
                     setFormState={setFormState}
                 /> : ""
             }

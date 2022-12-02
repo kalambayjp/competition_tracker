@@ -16,8 +16,8 @@ export const getGames = async () => {
 }
 const getWinningUids = (teamOne, teamTwo) => {
     const winningTeam = teamOne.outcome > 0 ? teamOne : teamTwo;
-    const playerUids = [...winningTeam.users];
-    return playerUids;
+    //const playerUids = winningTeam.users.map(player => player[0]);
+    return winningTeam.users;
 }
 
 export const addPlayedGame = (gameData) => {
@@ -28,7 +28,6 @@ export const addPlayedGame = (gameData) => {
     allUsers.forEach(async user => {
         const gamesDocRef = doc(db, "gamesPlayed", user);
         await updateDoc(gamesDocRef, {gamesPlayed: arrayUnion(gameData)});
-
         const recordDocRef = doc(db, "records", user);
         if (winningPlayers.includes(user)) {
             await updateDoc(recordDocRef, {wins: increment(1)})
